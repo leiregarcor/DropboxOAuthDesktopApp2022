@@ -13,19 +13,6 @@ redirect_uri = "http://" + server_addr + ":" + str(server_port)
 
 
 def local_server():
-    print('OAuth 2.0 access tokens lortzen...')
-    base_uri = "https://www.dropbox.com/oauth2/authorize"
-    goiburuak = {'Host': 'dropbox.com'}
-    datuak = {'client_id': app_key,
-              'redirect_uri': redirect_uri,  # Dirección IP de bucle invertido
-              'response_type': 'code', }
-
-    datuak_kodifikatuta = urllib.parse.urlencode(datuak)  # parametroak URI-an daude
-    auth_uri = base_uri + '?' + datuak_kodifikatuta
-
-    print("\n\t Web nabigatzailea irekitzen: Dropbox prompts user for consent")
-    webbrowser.open_new(auth_uri)
-
     print("\n\tHandle the OAuth 2.0 server response")
     # 8090. portuan entzuten dagoen zerbitzaria sortu
     listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -65,20 +52,39 @@ def local_server():
 
 
 def do_oauth():
-    # Authorization
-    print("###################################")
-    print("OAuth 2.0 for Mobile & Desktop Apps")
-    print("###################################")
+    print('OAuth 2.0 access tokens lortzen...')
+    base_uri = "https://www.dropbox.com/oauth2/authorize"
+    goiburuak = {'Host': 'dropbox.com'}
+    datuak = {'client_id': app_key,
+              'redirect_uri': redirect_uri,  # Dirección IP de bucle invertido
+              'response_type': 'code', }
 
-    print("\nPrerequisites on DropBox")
-    print("\tEnable APIs for your project")
-    print("\tChoose from different scopes in the ‘Permissions’ tab")
-    print("\tCreate authorization credentials")
+    datuak_kodifikatuta = urllib.parse.urlencode(datuak)  # parametroak URI-an daude
+    auth_uri = base_uri + '?' + datuak_kodifikatuta
+
+    print("\n\t Web nabigatzailea irekitzen: Dropbox prompts user for consent")
+    webbrowser.open_new(auth_uri)
 
     auth_code = local_server()
 
     # Exchange authorization code for access token
     # sartu kodea hemen
+
+    metodoa = 'POST'
+    uri = "https://api.dropboxapi.com/oauth2/token"
+    goiburuak = {'Host': 'dropboxapi.com'}
+    datuak = {'code': auth_code,
+              'grant_type': 'authorization_code ',
+              'redirect_uri': redirect_uri,  # Dirección IP de bucle invertido
+              'client_id': app_key,
+              'client_secret': app_secret}
+
+    datuak_kodifikatuta = urllib.parse.urlencode(datuak)
+
+    erantzuna = requests.post(uri, headers=goiburuak, data=datuak_kodifikatuta, allow_redirects=False)  # eskaera ez dugu nabigatzaileanegingo, gure programan egingo da
+    status = erantzuna.status_code
+    print("\t\tStatus: " + str(status))
+
 
     return access_token
 
