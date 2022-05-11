@@ -72,10 +72,11 @@ def do_oauth():
 
     metodoa = 'POST'
     uri = "https://api.dropboxapi.com/oauth2/token"
-    goiburuak = {'Host': 'dropboxapi.com'}
+    goiburuak = {'Host': 'api.dropboxapi.com',
+                 'Content-Type': 'application/x-www-form-urlencoded'}
     datuak = {'code': auth_code,
-              'grant_type': 'authorization_code ',
-              'redirect_uri': redirect_uri,  # Dirección IP de bucle invertido
+              'grant_type': 'authorization_code',
+              'redirect_uri': redirect_uri,
               'client_id': app_key,
               'client_secret': app_secret}
 
@@ -85,6 +86,17 @@ def do_oauth():
     status = erantzuna.status_code
     print("\t\tStatus: " + str(status))
 
+    #This endpoint returns a JSON-encoded dictionary
+    # that contains access_token -> The access token to be used to call the Dropbox API. denbora mugatu batean erabili ahalko da (expire_in definitzen den demboran)
+    #  refresh token -> this token is long-lived and won't expire automatically. It can be stored and re-used multiple times.
+
+    edukia = erantzuna.text
+    print("\t\tEdukia:")
+    print("\n" + edukia)
+    edukia_json = json.loads(edukia)
+    access_token = edukia_json['access_token']
+    print("\naccess_token: " + access_token)
+    print("Autentifikazio fluxua amaitu da.")
 
     return access_token
 
